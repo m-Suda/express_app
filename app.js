@@ -2,6 +2,9 @@
 var express = require('express');
 // Express 4.x系 ログをターミナルに表示してくれる
 var logger = require('morgan');
+// body-parserモジュールの読み込み。
+var bodyParser = require('body-parser');
+
 // expressオブジェクトの作成
 app = express();
 
@@ -19,6 +22,9 @@ app.set('view engine', 'ejs');
 // Express 4.x系では不要
 // app.use(app.router);
 // 静的ファイルをいちいちハンドリングするのがめんどくさいとき。
+// body-parserのjson
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
 app.use(logger('dev'));
 app.use(express.static(__dirname + '/public'));
 // middlewareを自作することも可能、functionを渡す。
@@ -44,6 +50,15 @@ app.get('/bye/:id', (req, res) => {
     res.send(`GoodBye!... ${req.params.name}`);
 });
 
+// getだけではなくpostでもできる。※body-parserモジュールが必要になる。詳細は↑
+app.get('/new', (req, res) => {
+    res.render('new');
+});
+app.post('/create', (req, res) => {
+    // postなのでbodyの中に値が入ってくる。
+    console.log(req.body);
+    res.send(req.body.name);
+});
 
 // テンプレートを使用する場合。
 app.get('/', (req, res) => {
