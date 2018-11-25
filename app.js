@@ -6,6 +6,14 @@ var logger = require('morgan');
 app = express();
 
 /**
+ * テンプレート関係
+ */
+// どのディレクトリか。
+app.set('views', __dirname + '/views');
+// どのテンプレートエンジンを使用するか。
+app.set('view engine', 'ejs');
+
+/**
  * .use: middlewareと呼ぶ。書く順番が重要。
  */
 // Express 4.x系では不要
@@ -14,17 +22,37 @@ app = express();
 app.use(logger('dev'));
 app.use(express.static(__dirname + '/public'));
 // middlewareを自作することも可能、functionを渡す。
-app.use((req, res, next) => {
-    console.log('My custom middleware');
-    // nextを忘れない。middlewareは上から適用されなかったときに次のmiddlewareを適用する。
-    // それをnext();という命令があることで実現されている。
+// app.use((req, res, next) => {
+//     console.log('My custom middleware');
+//     // nextを忘れない。middlewareは上から適用されなかったときに次のmiddlewareを適用する。
+//     // それをnext();という命令があることで実現されている。
+//     next();
+// });
+
+// パラメータに対して共通の処理をしたい。プレースホルダーの値を元に別の値にしたい場合。(ここではidを例)
+app.param('id', (req, res, next, id) => {
+    var users = ['hoge', 'fuga', 'piyo'];
+    req.params.name = users[id];
     next();
 });
-
-// '/'でアクセスしてきたら実行
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+app.get('/hello/:id', (req, res) => {
+    // res.send(`Hello!... ${req.params.id}`);
+    res.send(`Hello!... ${req.params.name}`);
 });
+app.get('/bye/:id', (req, res) => {
+    // res.send(`GoodBye!... ${req.params.id}`);
+    res.send(`GoodBye!... ${req.params.name}`);
+});
+
+
+// テンプレートを使用する場合。
+app.get('/', (req, res) => {
+    res.render('index', {title: 'this is title'});
+});
+// '/'でアクセスしてきたら実行
+// app.get('/', (req, res) => {
+//     res.send('Hello World!');
+// });
 app.get('/about', (req, res) => {
     res.send('about this page');
 });
